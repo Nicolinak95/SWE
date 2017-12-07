@@ -82,11 +82,11 @@ public class Spiel {
         this.SpielErgebnis = SpielErgebnis;
     }
 
-    public String getWinner() {
+    public String getGewinner() {
         return Gewinner;
     }
 
-    public void setWinner(String Gewinner) {
+    public void setGewinner(String Gewinner) {
         this.Gewinner = Gewinner;
     }
 
@@ -118,15 +118,15 @@ public class Spiel {
         return spieler1;
     }
 
-    public void setPlayer1(Spieler spieler1) {
+    public void setSpieler1(Spieler spieler1) {
         this.spieler1 = spieler1;
     }
 
-    public String getPlayer1Color() {
+    public String getSpieler1Color() {
         return spieler1Color;
     }
 
-    public void setPlayer1Color(String spieler1Color) {
+    public void setSpieler1Color(String spieler1Color) {
         this.spieler1Color = spieler1Color;
     }
 
@@ -134,16 +134,16 @@ public class Spiel {
         return spieler2;
     }
 
-    public void setPlayer2(Spieler spieler2) {
+    public void setSpieler2(Spieler spieler2) {
         this.spieler2 = spieler2;
     }
 
-    public String getPlayer2Color() {
+    public String getSpieler2Color() {
         return spieler2Color;
     }
 
-    public void setPlayer2Color(String player2Color) {
-        this.spieler2Color = player2Color;
+    public void setSpieler2Color(String spieler2Color) {
+        this.spieler2Color = spieler2Color;
     }
 
     public boolean isIsfull() {
@@ -217,13 +217,13 @@ public class Spiel {
         }else {
             if (!this.map.getHalfmapBvalid() && this.map.getHalfmapAvalid()){
                 this.setFinished(true);
-                this.setWinner(this.spieler1.getNickname() + " hat gewonnen!");
+                this.setGewinner(this.spieler1.getNickname() + " hat gewonnen!");
             }else if(!this.map.getHalfmapAvalid() && this.map.getHalfmapBvalid()) {
                 this.setFinished(true);
-                this.setWinner(this.spieler2.getNickname() + " hat gewonnen!");
+                this.setGewinner(this.spieler2.getNickname() + " hat gewonnen!");
             }else {
                 this.setFinished(true);
-                this.setWinner("both players registered unvalid map. game is finished before it could start");
+                this.setGewinner("Beide Spieler registrierten eine ungültige Karte. Das Spiel ist beendet, bevor es beginnen kann");
 
             }
         }

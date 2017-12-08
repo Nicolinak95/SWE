@@ -111,7 +111,7 @@ public class MainManager {
     }
 
     @PostMapping(value = "/spiel/{spiel_id}/spieler/{spieler_id}/move")
-    public ResponseEntity playerMoveRequest(@RequestBody TurnHilfe turn,
+    public ResponseEntity spielerMoveRequest(@RequestBody TurnHilfe turn,
                                             @PathVariable final Integer spiel_id,
                                             @PathVariable final Integer spieler_id) throws Exception{
 

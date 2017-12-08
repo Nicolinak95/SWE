@@ -1,6 +1,7 @@
 package map;
 
 import spiel.Spiel;
+import turn.TurnHilfe;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -105,8 +106,12 @@ public class Map {
 
         if (isHalfmapA){
             this.halfmapA = halfmap;
+            this.setCoordinatesOfCastleA(castleCoordinates);
+            this.setCoordinatesOfTreasureA(treasureCoordinates);
         }else {
             this.halfmapB = halfmap;
+            this.setCoordinatesOfCastleB(castleCoordinates);
+            this.setCoordinatesOfTreasureB(treasureCoordinates);
         }
 
         return true;
@@ -121,6 +126,80 @@ public class Map {
             this.isHalfmapBvalid = false;
             return isHalfmapBvalid;
         }
+    }
+    
+
+    /**
+     * Prüft ob der Spielzug vom Spieler in erlaubt ist
+     * @param isSpielerA
+     * @param turn
+     * @return true if _ is valid move
+     */
+    public boolean validateTurn(boolean isSpielerA, TurnHilfe turn) throws Exception {
+
+        int[] oldCoordinates = getCoordinatesFromString(turn.getCurrentPosition());
+        int[] newCoordinates = getCoordinatesFromString(turn.getNewPosition());
+
+        if (oldCoordinates == null || newCoordinates == null) return false;
+        System.out.println("coordinates exists");
+
+        int oldXIndex = "abcdefgh".indexOf(turn.getCurrentPosition().charAt(0));
+        if (isSpielerA && oldXIndex > 3 && !turn.isInventory()) return false;
+        System.out.println("p1 test");
+        if (!isSpielerA && oldXIndex <= 3 && !turn.isInventory()) return false;
+        System.out.println("p2 test");
+
+        int diff = Math.abs(oldCoordinates[0] - newCoordinates[0]);
+        int diffY = Math.abs(oldCoordinates[1] - newCoordinates[1]);
+        if (turn.isInventory()){
+            System.out.println("inventory");
+            if (diff <= 1 || diff == 3){
+                boolean isOnWater;
+                boolean isTreasureFound;
+                boolean isOnMountain;
+                if (isSpielerA){
+                    isOnWater = this.halfmapB[newCoordinates[0]][newCoordinates[1]] == 'w';
+                    isOnMountain = this.halfmapB[newCoordinates[0]][newCoordinates[1]] == 'm';
+                    isTreasureFound = this.halfmapB[newCoordinates[0]][newCoordinates[1]] == 't';
+                    if (isOnWater) return false;
+                    return true;
+                }else {
+                    isOnWater = this.halfmapA[newCoordinates[0]][newCoordinates[1]] == 'w';
+                    isOnMountain = this.halfmapA[newCoordinates[0]][newCoordinates[1]] == 'm';
+                    isTreasureFound = this.halfmapA[newCoordinates[0]][newCoordinates[1]] == 't';
+                    if (isOnWater) return false;
+                    return true;
+                }
+            }else {
+                return false;
+            }
+        }else  {
+            System.out.println("noInventory");
+            if (diff <= 1 && diff <= 1){
+                System.out.println("noInventory");
+                boolean isOnWater;
+                boolean isTreasureFound;
+                boolean isOnMountain;
+                if (isSpielerA){
+                    System.out.println("Spieler A");
+                    isOnWater = this.halfmapB[newCoordinates[0]][newCoordinates[1]] == 'w';
+                    isOnMountain = this.halfmapB[newCoordinates[0]][newCoordinates[1]] == 'm';
+                    isTreasureFound = this.halfmapB[newCoordinates[0]][newCoordinates[1]] == 't';
+                    if (isOnWater) return false;
+                    System.out.println("not on water");
+                    return true;
+                }else {
+                    isOnWater = this.halfmapA[newCoordinates[0]][newCoordinates[1]] == 'w';
+                    isOnMountain = this.halfmapA[newCoordinates[0]][newCoordinates[1]] == 'm';
+                    isTreasureFound = this.halfmapA[newCoordinates[0]][newCoordinates[1]] == 't';
+                    if (isOnWater) return false;
+                    return true;
+                }
+            }else {
+                return false;
+            }
+        }
+
     }
 
 
@@ -150,7 +229,7 @@ public class Map {
         return spiel;
    }
 
-   public void setGame(Spiel spiel) {
+   public void setSpiel(Spiel spiel) {
         this.spiel = spiel;
    }public Integer getId() {
         return id;

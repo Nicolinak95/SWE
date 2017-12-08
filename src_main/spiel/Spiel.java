@@ -3,7 +3,10 @@ package spiel;
 import map.Map;
 import spieler.Spieler;
 import turn.Turn;
+import turn.TurnHilfe;
+import turn.TurnBedienung;
 import org.hibernate.validator.constraints.NotBlank;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -209,11 +212,20 @@ public class Spiel {
         this.id = id;
     }
 
-    public void start() {
+    public Turn start() {
         if (this.map.getHalfmapAvalid() && this.map.getHalfmapBvalid()){
             this.setStarted(true);
             this.map.setEvalueated(true);
             this.currentRound = 1;
+            Turn initial = new Turn();
+            initial.setSpiel(this);
+            initial.setInventoryA(false);
+            initial.setInventoryB(false);
+            initial.setNewPositionA(this.map.getCoordinatesOfCastleB());
+            initial.setNewPositionB(this.map.getCoordinatesOfCastleA());
+            initial.setTurnNr(0);
+            return initial;
+
         }else {
             if (!this.map.getHalfmapBvalid() && this.map.getHalfmapAvalid()){
                 this.setFinished(true);
@@ -224,8 +236,58 @@ public class Spiel {
             }else {
                 this.setFinished(true);
                 this.setGewinner("Beide Spieler registrierten eine ungültige Karte. Das Spiel ist beendet, bevor es beginnen kann");
+            }
+            return null;
+        }
+    }
+            
 
+    public Turn addTurn(boolean isSpielerA, TurnHilfe turn) throws Exception {
+        Turn prevTurn = this.getTurns().stream().filter(t -> t.getTurnNr() == turn.getTurnNumber() -1 ).findAny().orElse(null);
+        Turn currentTurn = this.getTurns().stream().filter(t -> t.getTurnNr() == turn.getTurnNumber()).findAny().orElse(null);
+        Turn toReturn;
+        if (prevTurn == null && currentTurn == null) throw new Exception("Zug ist unzulässig, Spiel hat noch nicht gestartet");
+
+        boolean carryingTreasure;
+        boolean isMoveValid;
+        boolean isOnWater;
+        boolean isTreasureFound;
+        boolean isOnMountain;
+        boolean isInsideGameArea;
+
+        isMoveValid = this.map.validateTurn(isSpielerA, turn);
+
+        if (!isMoveValid) throw new Exception("Den Zug den Sie machen wollen, ist nicht zulässig");
+        if (isSpielerA ){
+           Turn newTurn = new Turn();
+           newTurn.setTurnNr(prevTurn.getTurnNr() +1);
+           newTurn.setOldPositionA(turn.getCurrentPosition());
+           newTurn.setNewPositionA(turn.getNewPosition());
+           newTurn.setInventoryA(false); // TODO: change to better logicA
+           this.turns.add(newTurn);
+           toReturn = newTurn;
+        }else {
+            if (currentTurn != null){
+                currentTurn.setOldPositionB(turn.getCurrentPosition());
+                currentTurn.setNewPositionB(turn.getNewPosition());
+                currentTurn.setInventoryA(false); // TODO: change to better logicA
+                toReturn = currentTurn;
+            }else {
+                Turn newTurn = new Turn();
+                newTurn.setTurnNr(prevTurn.getTurnNr() +1);
+                newTurn.setOldPositionB(turn.getCurrentPosition());
+                newTurn.setNewPositionB(turn.getNewPosition());
+                newTurn.setInventoryA(false); // TODO: change to better logicA
+                this.turns.add(newTurn);
+                toReturn = currentTurn;
             }
         }
+
+
+        this.currentRound++;
+        if (this.currentRound == this.maxNumberOfRounds){
+            this.setFinished(true);
+        }
+        return toReturn;
     }
 }

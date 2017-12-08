@@ -6,6 +6,8 @@ import spiel.SpielBedienung;
 import map.MapHilfe;
 import spieler.Spieler;
 import spieler.SpielerBedienung;
+import turn.Turn;
+import turn.TurnHilfe;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +110,21 @@ public class MainManager {
        return response;
     }
 
+    @PostMapping(value = "/spiel/{spiel_id}/spieler/{spieler_id}/move")
+    public ResponseEntity playerMoveRequest(@RequestBody TurnHilfe turn,
+                                            @PathVariable final Integer spiel_id,
+                                            @PathVariable final Integer spieler_id) throws Exception{
+
+        logger.info("Player move request by : " + spieler_id);
+
+        Spiel spiel = spielBedienung.registerMove(spiel_id, spieler_id, turn);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(MediaType.APPLICATION_JSON_UTF8_VALUE));
+        ResponseEntity<Spiel> response = new ResponseEntity<Spiel>(spiel,headers, HttpStatus.ACCEPTED);
+        return response;
+    }
+
+    
     @PostMapping(value="/spiel/{spiel_id}/join", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity joinSpiel(@Valid @RequestBody Spieler spieler, @PathVariable final Integer spiel_id) throws Exception {
         logger.info("Spielanforderung beitreten" + spieler.getNickname());

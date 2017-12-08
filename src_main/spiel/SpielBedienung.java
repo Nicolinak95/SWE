@@ -6,6 +6,9 @@ import map.MapHilfe;
 import map.MapBedienung;
 import spieler.Spieler;
 import spieler.SpielerBedienung;
+import turn.Turn;
+import turn.TurnHilfe;
+import turn.TurnBedienung;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,9 @@ public class SpielBedienung {
 
     @Autowired
     SpielRepository spielRepository;
+    
+    @Autowired
+    TurnBedienung turnBedienung;
 
     @Autowired
     SpielerBedienung spielerBedienung;
@@ -71,6 +77,11 @@ public class SpielBedienung {
 
         logger.info("Spielkarte wurde initialisiert");
         if (spielMap.getHalfmapA() != null && spielMap.getHalfmapB() != null) spiel.start();
+        if (spielMap.getHalfmapA() != null && spielMap.getHalfmapB() != null){
+            Turn initial = spiel.start();
+            turnBedienung.addTurn(initial);
+            spiel.getTurns().add(initial);
+        }
         mapBedienung.save(spielMap);
         return spielRepository.save(spiel);
     }
@@ -101,5 +112,31 @@ public class SpielBedienung {
         return spiel;
 
     }
+
+public Spiel registerMove(Integer spiel_id, Integer spieler_id, TurnHilfe turn) throws Exception {
+    Spiel spiel = spielRepository.findOne(spiel_id);
+    if (spiel == null){
+        throw new Exception("Zug existiert nicht, Spiel kann nicht registrieren");
+    }
+    if (!spiel.isStarted()) throw new Exception("Spiel hat noch nicht begonnen");
+    if (spiel.isFinished()) throw new Exception("Spiel ist fertig");
+
+    logger.info("Registrierung von Spielzug im Spiel : " + spiel_id);
+
+
+    String whose = spiel.getSpieler1().getId() == spieler_id ? "p1" :(spiel.getSpieler2().getId() == spieler_id? "p2" : null);
+
+    if (whose == null) throw new Exception("Man kann keinen Zug registrieren, wenn man sich nicht in der Spielerliste befindet");
+
+    Turn newTurn = spiel.addTurn(whose.equals("p1"),turn);
+    turnBedienung.addTurn(newTurn);
+    spielRepository.save(spiel);
+    return spiel;
+
+
+
+
+
+}
 }
 
